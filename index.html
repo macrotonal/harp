@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Macro - Harp Enharmonic Spelling v4</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{color-scheme:light;
+  --bg:#014b4a;--text:#d4e8d8;
+  --dim:rgba(212,232,216,0.48);--faint:rgba(212,232,216,0.22);
+  --border:rgba(46,139,87,0.15);--card:rgba(10,16,12,0.96);
+  --green:#2e8b57;--gl:#5fb88a;
+  --red:#ff6b55;--yellow:#ffd84a;--green-note:#4ed87a;--blue:#5ab4ff;
+  --red-bg:rgba(255,107,85,0.1);--yellow-bg:rgba(255,216,74,0.1);
+  --green-bg:rgba(78,216,122,0.1);--blue-bg:rgba(90,180,255,0.1);
+  --red-border:rgba(255,107,85,0.35);--yellow-border:rgba(255,216,74,0.35);
+  --green-border:rgba(78,216,122,0.35);--blue-border:rgba(90,180,255,0.35);
+}
+html{scroll-behavior:smooth}
+html,body{background:#014b4a!important;}
+body{color:var(--text);
+  font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;
+  min-height:100vh;padding:40px 16px 64px;
+}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;background:none;}
+.frame{display:none}
+.wrap{position:relative;max-width:900px;margin:0 auto;}
+
+/* Header */
+.header{text-align:center;margin-bottom:32px;}
+.eyebrow{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:7px;text-transform:uppercase;color:rgba(46,139,87,0.45);margin-bottom:12px;display:block;font-weight:700;}
+h1{font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:clamp(22px,4vw,36px);font-weight:300;color:#e8f5ec;margin-bottom:6px;letter-spacing:1px;}
+.sub{font-size:13px;color:var(--faint);line-height:1.6;max-width:520px;margin:0 auto;}
+.rule{display:none}
+
+/* Legend */
+.legend{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:24px;}
+.legend-item{display:flex;align-items:center;gap:8px;background:transparent;
+  border:none;border-radius:0;padding:5px 12px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.08em;color:rgba(212,232,216,0.75);}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.legend-sub{font-family:'Space Mono',monospace;font-size:9px;color:rgba(212,232,216,0.45);margin-top:1px;}
+
+/* Octave selector / toggle buttons */
+.oct-wrap{display:flex;gap:6px;justify-content:center;margin-bottom:22px;flex-wrap:wrap;}
+.oct-btn{
+  background:#fff;border:2px solid #111;color:#111;
+  padding:7px 16px;border-radius:4px;
+  font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;font-weight:700;
+  cursor:pointer;transition:all 0.2s;
+}
+.oct-btn:hover{background:#acc6a1;border-color:#111;}
+.oct-btn.active{background:#2e8b57;border-color:#2e8b57;color:#fff;}
+
+/* Table */
+.table-wrap{background:#fff;border:2px solid #111;border-radius:8px;margin-bottom:20px;overflow-x:auto;}
+.table-head-row{padding:12px 20px;border-bottom:2px solid #111;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{padding:8px 16px;text-align:left;color:#2e8b57;font-weight:700;
+  font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;
+  border-bottom:2px solid #111;white-space:nowrap;}
+td{padding:9px 16px;border-bottom:1px solid rgba(17,17,17,0.08);color:#111;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#7a9e7a;}
+tr:hover td *:not(.cents-badge){color:#1a1a18 !important;}
+tr:hover .cents-badge{background:rgba(0,0,0,0.08) !important;border-color:rgba(0,0,0,0.2) !important;}
+
+/* Note chip */
+.note-chip{display:inline-flex;align-items:center;gap:6px;}
+.colour-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+/* Cents badge */
+.cents-badge{display:inline-block;padding:2px 8px;border-radius:2px;
+  font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.06em;}
+
+/* Spelling */
+.spelling{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.06em;color:#111;}
+.adj{font-family:'Space Mono',monospace;font-size:9px;opacity:0.6;}
+
+/* Quick reference grid */
+.quick-ref{background:#fff;border:2px solid #111;border-radius:8px;padding:18px 20px;margin-bottom:20px;}
+.qr-title{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#2e8b57;font-weight:700;margin-bottom:14px;}
+.qr-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.qr-card{padding:12px 14px;border-radius:4px;}
+.qr-name{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;font-weight:700;margin-bottom:4px;}
+.qr-desc{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:0.04em;line-height:1.5;}
+
+/* Audio feedback */
+tr.playing td{background:#7a9e7a !important;}
+tr.playing td *:not(.cents-badge){color:#1a1a18 !important;}
+tr.playing .cents-badge{background:rgba(0,0,0,0.08) !important;border-color:rgba(0,0,0,0.2) !important;}
+.play-dot{display:inline-block;width:6px;height:6px;border-radius:50%;
+  background:currentColor;margin-right:4px;opacity:0;transition:opacity 0.15s;vertical-align:middle;}
+tr.playing .play-dot{opacity:1;}
+tr{cursor:pointer;}
+.middle-c-tag{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.08em;color:#2e8b57;margin-left:6px;}
+
+/* Footer */
+.footer{text-align:center;margin-top:24px;padding-bottom:20px;}
+.home-link{
+  display:inline-block;background:#fff;border:2px solid #111;color:#111;
+  padding:8px 20px;border-radius:4px;
+  font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;font-weight:700;
+  text-decoration:none;transition:all 0.2s;
+}
+.home-link:hover{background:#2e8b57;border-color:#2e8b57;color:#fff;}
+
+@media(max-width:540px){.qr-grid{grid-template-columns:repeat(2,1fr);}}
+
+/* Macro moire logo */
+.logo-wrap{text-align:center;margin-bottom:24px}
+.macro-graphic{--moire-x:0px;--moire-y:0px;--moire-start:0deg;--moire-opacity:1;
+  position:relative;width:clamp(120px,22vmin,200px);aspect-ratio:1;
+  opacity:0;animation:mgFadeIn 1.8s ease 0.3s forwards;display:inline-block}
+.macro-lines{position:absolute;inset:0;width:100%;height:100%;overflow:visible;
+  mix-blend-mode:screen;pointer-events:none;transform-origin:50% 50%}
+.macro-lines line{stroke:#fff;stroke-width:4.2;stroke-linecap:butt;shape-rendering:geometricPrecision}
+.macro-lines circle{fill:#fff;shape-rendering:geometricPrecision}
+.macro-lines--still{opacity:1}
+.macro-lines--moire{opacity:var(--moire-opacity);animation:macroMoireTurn 420s linear infinite;will-change:transform}
+@keyframes macroMoireTurn{
+  from{transform:translate3d(var(--moire-x),var(--moire-y),0) rotate(var(--moire-start)) scale(1.006)}
+  to{transform:translate3d(var(--moire-x),var(--moire-y),0) rotate(calc(var(--moire-start) + 360deg)) scale(1.006)}}
+@keyframes mgFadeIn{from{opacity:0}to{opacity:1}}
+</style>
+</head>
+<body>
+<div class="frame"></div>
+<div class="wrap">
+
+  
+<div class="logo-wrap"><a href="https://macrotonal.github.io/home/" aria-label="Home" style="display:inline-block;text-decoration:none" title="Home"><div class="macro-graphic" id="macroGraphic" aria-label="Macro - animated interference graphic"></div></a></div>
+<div class="header">
+    <span class="eyebrow">Macro · Harp Reference</span>
+    <h1>Enharmonic Spelling</h1>
+    <div class="rule"></div>
+    <p class="sub">Standard note names with microtonal adjustments for harp performance. Each macrotonal degree is expressed as the nearest standard pitch plus a &#188; or &#8539; tone deviation.</p>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-dot" style="background:var(--red)"></div>
+      <div><div>Red - 0&cent;</div><div class="legend-sub">No adjustment</div></div>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:var(--yellow)"></div>
+      <div><div>Yellow - +25&cent;</div><div class="legend-sub">&#8539; tone sharp</div></div>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:var(--green)"></div>
+      <div><div>Green - &minus;50&cent;</div><div class="legend-sub">&#188; tone flat</div></div>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:var(--blue)"></div>
+      <div><div>Blue - &minus;25&cent;</div><div class="legend-sub">&#8539; tone flat</div></div>
+    </div>
+  </div>
+
+  <!-- Quick reference -->
+  <div class="quick-ref">
+    <div class="qr-title">Adjustment key</div>
+    <div class="qr-grid">
+      <div class="qr-card" style="background:var(--red-bg);border:1px solid var(--red-border)">
+        <div class="qr-name" style="color:var(--red)">No adjustment</div>
+        <div class="qr-desc" style="color:var(--red)">Play the notated pitch exactly as written. Standard tuning.</div>
+      </div>
+      <div class="qr-card" style="background:var(--yellow-bg);border:1px solid var(--yellow-border)">
+        <div class="qr-name" style="color:var(--yellow)">&#8539; tone sharp (+25&cent;)</div>
+        <div class="qr-desc" style="color:var(--yellow)">Raise the notated pitch by one eighth of a tone above standard.</div>
+      </div>
+      <div class="qr-card" style="background:var(--green-bg);border:1px solid var(--green-border)">
+        <div class="qr-name" style="color:var(--green)">&#188; tone flat (&minus;50&cent;)</div>
+        <div class="qr-desc" style="color:var(--green)">Lower the notated pitch by one quarter of a tone below standard.</div>
+      </div>
+      <div class="qr-card" style="background:var(--blue-bg);border:1px solid var(--blue-border)">
+        <div class="qr-name" style="color:var(--blue)">&#8539; tone flat (&minus;25&cent;)</div>
+        <div class="qr-desc" style="color:var(--blue)">Lower the notated pitch by one eighth of a tone below standard.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Octave selector -->
+  <div class="oct-wrap" id="octWrap"></div>
+
+  <!-- MIDI/Score toggle -->
+  <div class="oct-wrap" style="margin-bottom:16px;">
+    <button class="oct-btn"        id="btnMidi"  onclick="setNoteMode('midi')">MIDI &middot; Middle C = C3</button>
+    <button class="oct-btn active" id="btnScore" onclick="setNoteMode('score')">Score &middot; Middle C = C4</button>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table id="mainTable">
+      <thead>
+        <tr>
+          <th>Degree</th>
+          <th>Spelling</th>
+          <th>Adjustment</th>
+          <th>Cents</th>
+          <th>Colour</th>
+          <th>Harp instruction</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <div class="footer"><a href="https://macrotonal.github.io/home/" class="home-link">&#8592; Home</a></div>
+</div>
+
+<script>
+// Full data from spreadsheet - all 12 notes per octave cycle, 9 cycles (0–8)
+const DATA = [
+  // oct 0
+  {note:'C', oct:0, spelling:'C0', adj:'1/8&#9837;', cents:-25},
+  {note:'C#',oct:0, spelling:'C#0', adj:'', cents:0},
+  {note:'D', oct:0, spelling:'D0', adj:'1/8&#9839;', cents:25},
+  {note:'D#',oct:0, spelling:'D#0', adj:'', cents:0},
+  {note:'E', oct:0, spelling:'E0', adj:'1/4&#9837;', cents:-50},
+  {note:'F', oct:0, spelling:'F0', adj:'1/8&#9837;', cents:-25},
+  {note:'F#',oct:0, spelling:'F#0', adj:'', cents:0},
+  {note:'G', oct:0, spelling:'G0', adj:'1/8&#9839;', cents:25},
+  {note:'G#',oct:0, spelling:'G#0', adj:'', cents:0},
+  {note:'A', oct:0, spelling:'A0', adj:'1/4&#9837;', cents:-50},
+  {note:'A#',oct:0, spelling:'A#0', adj:'1/8&#9837;', cents:-25},
+  {note:'B', oct:0, spelling:'B0', adj:'', cents:0},
+  // oct 1
+  {note:'C', oct:1, spelling:'C1', adj:'1/8&#9839;', cents:25},
+  {note:'C#',oct:1, spelling:'C#1', adj:'', cents:0},
+  {note:'D', oct:1, spelling:'D1', adj:'1/4&#9837;', cents:-50},
+  {note:'D#',oct:1, spelling:'D#1', adj:'1/8&#9837;', cents:-25},
+  {note:'E', oct:1, spelling:'E1', adj:'', cents:0},
+  {note:'F', oct:1, spelling:'F1', adj:'1/8&#9839;', cents:25},
+  {note:'F#',oct:1, spelling:'F#1', adj:'', cents:0},
+  {note:'G', oct:1, spelling:'G1', adj:'1/4&#9837;', cents:-50},
+  {note:'G#',oct:1, spelling:'G#1', adj:'1/8&#9837;', cents:-25},
+  {note:'A', oct:1, spelling:'A1', adj:'', cents:0},
+  {note:'A#',oct:1, spelling:'A#1', adj:'1/8&#9839;', cents:25},
+  {note:'B', oct:1, spelling:'B1', adj:'', cents:0},
+  // oct 2
+  {note:'C', oct:2, spelling:'C2', adj:'1/4&#9837;', cents:-50},
+  {note:'C#',oct:2, spelling:'C#2', adj:'1/8&#9837;', cents:-25},
+  {note:'D', oct:2, spelling:'D2', adj:'', cents:0},
+  {note:'D#',oct:2, spelling:'D#2', adj:'1/8&#9839;', cents:25},
+  {note:'E', oct:2, spelling:'E2', adj:'', cents:0},
+  {note:'F', oct:2, spelling:'F2', adj:'1/4&#9837;', cents:-50},
+  {note:'F#',oct:2, spelling:'F#2', adj:'1/8&#9837;', cents:-25},
+  {note:'G', oct:2, spelling:'G2', adj:'', cents:0},
+  {note:'G#',oct:2, spelling:'G#2', adj:'1/8&#9839;', cents:25},
+  {note:'A', oct:2, spelling:'A2', adj:'', cents:0},
+  {note:'A#',oct:2, spelling:'A#2', adj:'1/4&#9837;', cents:-50},
+  {note:'B', oct:2, spelling:'B2', adj:'1/8&#9837;', cents:-25},
+  // oct 3
+  {note:'C', oct:3, spelling:'C3', adj:'', cents:0},
+  {note:'C#',oct:3, spelling:'C#3', adj:'1/8&#9839;', cents:25},
+  {note:'D', oct:3, spelling:'D3', adj:'', cents:0},
+  {note:'D#',oct:3, spelling:'D#3', adj:'1/4&#9837;', cents:-50},
+  {note:'E', oct:3, spelling:'E3', adj:'1/8&#9837;', cents:-25},
+  {note:'F', oct:3, spelling:'F3', adj:'', cents:0},
+  {note:'F#',oct:3, spelling:'F#3', adj:'1/8&#9839;', cents:25},
+  {note:'G', oct:3, spelling:'G3', adj:'', cents:0},
+  {note:'G#',oct:3, spelling:'G#3', adj:'1/4&#9837;', cents:-50},
+  {note:'A', oct:3, spelling:'A3', adj:'1/8&#9837;', cents:-25},
+  {note:'A#',oct:3, spelling:'A#3', adj:'', cents:0},
+  {note:'B', oct:3, spelling:'B3', adj:'1/8&#9839;', cents:25},
+  // oct 4
+  {note:'C', oct:4, spelling:'C4', adj:'', cents:0},
+  {note:'C#',oct:4, spelling:'C#4', adj:'1/4&#9837;', cents:-50},
+  {note:'D', oct:4, spelling:'D4', adj:'1/8&#9837;', cents:-25},
+  {note:'D#',oct:4, spelling:'D#4', adj:'', cents:0},
+  {note:'E', oct:4, spelling:'E4', adj:'1/8&#9839;', cents:25},
+  {note:'F', oct:4, spelling:'F4', adj:'', cents:0},
+  {note:'F#',oct:4, spelling:'F#4', adj:'1/4&#9837;', cents:-50},
+  {note:'G', oct:4, spelling:'G4', adj:'1/8&#9837;', cents:-25},
+  {note:'G#',oct:4, spelling:'G#4', adj:'', cents:0},
+  {note:'A', oct:4, spelling:'A4', adj:'1/8&#9839;', cents:25},
+  {note:'A#',oct:4, spelling:'A#4', adj:'', cents:0},
+  {note:'B', oct:4, spelling:'B4', adj:'1/4&#9837;', cents:-50},
+  // oct 5
+  {note:'C', oct:5, spelling:'C5', adj:'1/8&#9837;', cents:-25},
+  {note:'C#',oct:5, spelling:'C#5', adj:'', cents:0},
+  {note:'D', oct:5, spelling:'D5', adj:'1/8&#9839;', cents:25},
+  {note:'D#',oct:5, spelling:'D#5', adj:'', cents:0},
+  {note:'E', oct:5, spelling:'E5', adj:'1/4&#9837;', cents:-50},
+  {note:'F', oct:5, spelling:'F5', adj:'1/8&#9837;', cents:-25},
+  {note:'F#',oct:5, spelling:'F#5', adj:'', cents:0},
+  {note:'G', oct:5, spelling:'G5', adj:'1/8&#9839;', cents:25},
+  {note:'G#',oct:5, spelling:'G#5', adj:'', cents:0},
+  {note:'A', oct:5, spelling:'A5', adj:'1/4&#9837;', cents:-50},
+  {note:'A#',oct:5, spelling:'A#5', adj:'1/8&#9837;', cents:-25},
+  {note:'B', oct:5, spelling:'B5', adj:'', cents:0},
+  // oct 6
+  {note:'C', oct:6, spelling:'C6', adj:'1/8&#9839;', cents:25},
+  {note:'C#',oct:6, spelling:'C#6', adj:'', cents:0},
+  {note:'D', oct:6, spelling:'D6', adj:'1/4&#9837;', cents:-50},
+  {note:'D#',oct:6, spelling:'D#6', adj:'1/8&#9837;', cents:-25},
+  {note:'E', oct:6, spelling:'E6', adj:'', cents:0},
+  {note:'F', oct:6, spelling:'F6', adj:'1/8&#9839;', cents:25},
+  {note:'F#',oct:6, spelling:'F#6', adj:'', cents:0},
+  {note:'G', oct:6, spelling:'G6', adj:'1/4&#9837;', cents:-50},
+  {note:'G#',oct:6, spelling:'G#6', adj:'1/8&#9837;', cents:-25},
+  {note:'A', oct:6, spelling:'A6', adj:'', cents:0},
+  {note:'A#',oct:6, spelling:'A#6', adj:'1/8&#9839;', cents:25},
+  {note:'B', oct:6, spelling:'B6', adj:'', cents:0},
+  // oct 7
+  {note:'C', oct:7, spelling:'C7', adj:'1/4&#9837;', cents:-50},
+  {note:'C#',oct:7, spelling:'C#7', adj:'1/8&#9837;', cents:-25},
+  {note:'D', oct:7, spelling:'D7', adj:'', cents:0},
+  {note:'D#',oct:7, spelling:'D#7', adj:'1/8&#9839;', cents:25},
+  {note:'E', oct:7, spelling:'E7', adj:'', cents:0},
+  {note:'F', oct:7, spelling:'F7', adj:'1/4&#9837;', cents:-50},
+  {note:'F#',oct:7, spelling:'F#7', adj:'1/8&#9837;', cents:-25},
+  {note:'G', oct:7, spelling:'G7', adj:'', cents:0},
+  {note:'G#',oct:7, spelling:'G#7', adj:'1/8&#9839;', cents:25},
+  {note:'A', oct:7, spelling:'A7', adj:'', cents:0},
+  {note:'A#',oct:7, spelling:'A#7', adj:'1/4&#9837;', cents:-50},
+  {note:'B', oct:7, spelling:'B7', adj:'1/8&#9837;', cents:-25},
+  // oct 8
+  {note:'C', oct:8, spelling:'C8', adj:'', cents:0},
+]
+
+const COLOUR = {
+  0:   {name:'Red',    hex:'#ff6b55', bg:'rgba(255,107,85,0.1)',  border:'rgba(255,107,85,0.3)'},
+  25:  {name:'Yellow', hex:'#ffd84a', bg:'rgba(255,216,74,0.1)',  border:'rgba(255,216,74,0.3)'},
+  '-50':{name:'Green', hex:'#4ed87a', bg:'rgba(78,216,122,0.1)', border:'rgba(78,216,122,0.3)'},
+  '-25':{name:'Blue',  hex:'#5ab4ff', bg:'rgba(90,180,255,0.1)', border:'rgba(90,180,255,0.3)'},
+}
+
+function getCol(cents) { return COLOUR[cents] || COLOUR[0] }
+function adjLabel(cents) {
+  if (cents === 0)   return 'No adjustment'
+  if (cents === 25)  return '&#8539; tone sharp'
+  if (cents === -50) return '&#188; tone flat'
+  if (cents === -25) return '&#8539; tone flat'
+  return ''
+}
+function harpInstruction(row) {
+  const sp = row.note + displayOct(row.oct)
+  if (row.cents === 0)   return 'Play ' + sp + ' as written'
+  if (row.cents === 25)  return 'Raise ' + sp + ' by &#8539; tone'
+  if (row.cents === -50) return 'Lower ' + sp + ' by &#188; tone'
+  if (row.cents === -25) return 'Lower ' + sp + ' by &#8539; tone'
+  return ''
+}
+
+let noteMode = 'score'
+
+function setNoteMode(mode) {
+  noteMode = mode
+  document.getElementById('btnMidi').classList.toggle('active', mode==='midi')
+  document.getElementById('btnScore').classList.toggle('active', mode==='score')
+  buildOctButtons()
+  renderTable()
+}
+
+function displayOct(oct) {
+  return noteMode === 'score' ? oct + 1 : oct
+}
+
+function isMiddleC(row) {
+  // Middle C = C4 in Score (oct 3 in MIDI/data), C3 in MIDI (oct 3 in data when midi mode)
+  return row.note === 'C' && (
+    (noteMode === 'score' && row.oct === 3) ||
+    (noteMode === 'midi'  && row.oct === 3)
+  )
+}
+
+// ── Audio ────────────────────────────────────────────────────
+let audioCtx = null
+let activeOsc = null
+let activeRow = null
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)()
+  if (audioCtx.state === 'suspended') audioCtx.resume()
+  return audioCtx
+}
+
+// Standard A4 = 440 Hz reference; macrotonal root C3(data) = C4(score) = 261.63 Hz
+// Each degree = 125 cents. We play the nearest standard pitch then apply the cent offset.
+const STD_FREQS = {
+  'C':261.63,'C#':277.18,'D':293.66,'D#':311.13,'E':329.63,
+  'F':349.23,'F#':369.99,'G':392.00,'G#':415.30,'A':440.00,'A#':466.16,'B':493.88
+}
+
+function noteFreq(row) {
+  // Base frequency for this note in octave 4 (data oct 3 = score oct 4)
+  const base4 = STD_FREQS[row.note]
+  // Shift by octave difference from oct 3 (data)
+  const octShift = row.oct - 3
+  const baseFreq = base4 * Math.pow(2, octShift)
+  // Apply cent adjustment
+  return baseFreq * Math.pow(2, row.cents / 1200)
+}
+
+function playRow(row, trEl) {
+  const ctx = getAudioCtx()
+  const FADE = 0.05
+
+  // Fade out previous oscillator smoothly instead of hard-stopping
+  if (activeOsc) {
+    const prev = activeOsc
+    const prevGain = activeOsc._gain
+    try {
+      if (prevGain) {
+        prevGain.gain.cancelScheduledValues(ctx.currentTime)
+        prevGain.gain.setValueAtTime(prevGain.gain.value, ctx.currentTime)
+        prevGain.gain.linearRampToValueAtTime(0, ctx.currentTime + FADE)
+      }
+      prev.stop(ctx.currentTime + FADE + 0.02)
+    } catch(e) {}
+    activeOsc = null
+  }
+  if (activeRow) activeRow.classList.remove('playing')
+
+  activeRow = trEl
+  trEl.classList.add('playing')
+
+  // Start new note after the fade gap to avoid overlap click
+  const t = ctx.currentTime + FADE + 0.01
+
+  const osc  = ctx.createOscillator()
+  const gain = ctx.createGain()
+  osc.type = 'sine'
+  osc.frequency.value = noteFreq(row)
+  gain.gain.setValueAtTime(0, t)
+  gain.gain.linearRampToValueAtTime(0.22, t + 0.05)
+  gain.gain.setValueAtTime(0.22, t + 2.45)
+  gain.gain.linearRampToValueAtTime(0, t + 2.6)
+  osc.connect(gain); gain.connect(ctx.destination)
+  osc.start(t)
+  osc.stop(t + 2.65)
+  osc._gain = gain
+  activeOsc = osc
+
+  osc.onended = () => {
+    if (activeRow === trEl) {
+      trEl.classList.remove('playing')
+      activeRow = null
+    }
+  }
+}
+
+// Unique octaves
+const OCTAVES = [...new Set(DATA.map(d=>d.oct))].sort((a,b)=>a-b)
+let currentOct = 3  // data oct 3 = Score Cycle 4 (Middle C)
+
+function buildOctButtons() {
+  const wrap = document.getElementById('octWrap')
+  wrap.innerHTML = ''
+  OCTAVES.forEach(o => {
+    const b = document.createElement('button')
+    b.className = 'oct-btn' + (o===currentOct?' active':'')
+    b.id = 'oct'+o
+    b.textContent = 'Octave ' + displayOct(o)
+    b.onclick = () => setOct(o)
+    wrap.appendChild(b)
+  })
+}
+
+function setOct(o) {
+  currentOct = o
+  OCTAVES.forEach(oct => document.getElementById('oct'+oct)?.classList.toggle('active', oct===o))
+  renderTable()
+}
+
+function renderTable() {
+  const tbody = document.getElementById('tableBody')
+  tbody.innerHTML = ''
+  const rows = DATA.filter(d => d.oct === currentOct)
+  rows.forEach((row, i) => {
+    const col = getCol(row.cents)
+    const middleC = row.note === 'C' && row.oct === 3
+    const tr = document.createElement('tr')
+    tr.innerHTML = `
+      <td style="color:${col.hex};font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;letter-spacing:1px">${i+1}</td>
+      <td>
+        <span class="play-dot" style="color:${col.hex}"></span>
+        <span class="spelling" style="color:${col.hex}">${row.note}${displayOct(row.oct)}</span>
+        ${row.adj ? `<span class="adj" style="color:${col.hex}"> (${row.adj})</span>` : ''}
+        ${middleC ? `<span class="middle-c-tag">Middle C</span>` : ''}
+      </td>
+      <td>
+        <span class="cents-badge" style="background:${col.bg};border:1px solid ${col.border};color:${col.hex}">
+          ${adjLabel(row.cents)}
+        </span>
+      </td>
+      <td style="color:${col.hex};font-variant-numeric:tabular-nums">
+        ${row.cents === 0 ? '0&cent;' : (row.cents > 0 ? '+' : '') + row.cents + '&cent;'}
+      </td>
+      <td>
+        <div class="note-chip">
+          <div class="colour-dot" style="background:${col.hex}"></div>
+          <span style="color:${col.hex};font-size:12px">${col.name}</span>
+        </div>
+      </td>
+      <td style="color:var(--dim);font-size:12px">${harpInstruction(row)}</td>
+    `
+    tr.addEventListener('click', () => playRow(row, tr))
+    tbody.appendChild(tr)
+  })
+}
+
+buildOctButtons()
+renderTable();
+
+(function(){
+  var graphic = document.getElementById('macroGraphic');
+  if (!graphic) return;
+  function buildLayer(cls) {
+    var ns='http://www.w3.org/2000/svg';
+    var svg=document.createElementNS(ns,'svg');
+    var C=500, ir=108, or_=432, n=60;
+    svg.setAttribute('class','macro-lines '+cls);
+    svg.setAttribute('viewBox','0 0 1000 1000');
+    svg.setAttribute('aria-hidden','true');
+    svg.setAttribute('preserveAspectRatio','xMidYMid meet');
+    for(var i=0;i<n;i++){
+      var a=((i/n)*Math.PI*2)-(Math.PI/2);
+      var l=document.createElementNS(ns,'line');
+      l.setAttribute('x1',String(C+Math.cos(a)*ir));
+      l.setAttribute('y1',String(C+Math.sin(a)*ir));
+      l.setAttribute('x2',String(C+Math.cos(a)*or_));
+      l.setAttribute('y2',String(C+Math.sin(a)*or_));
+      svg.appendChild(l);
+    }
+    var c=document.createElementNS(ns,'circle');
+    c.setAttribute('cx',String(C));c.setAttribute('cy',String(C));c.setAttribute('r','109');
+    svg.appendChild(c);
+    return svg;
+  }
+  graphic.appendChild(buildLayer('macro-lines--still'));
+  graphic.appendChild(buildLayer('macro-lines--moire'));
+  function setI(cx,cy){
+    var r=document.body.getBoundingClientRect();
+    var x=((cx-r.left)/r.width)-0.5, y=((cy-r.top)/r.height)-0.5;
+    graphic.style.setProperty('--moire-x',(x*7).toFixed(2)+'px');
+    graphic.style.setProperty('--moire-y',(y*7).toFixed(2)+'px');
+    graphic.style.setProperty('--moire-start',(x*0.45).toFixed(3)+'deg');
+  }
+  document.body.addEventListener('pointermove',function(e){setI(e.clientX,e.clientY);},{passive:true});
+})();
+</script>
+</body>
+</html>
