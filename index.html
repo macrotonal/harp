@@ -89,11 +89,11 @@ tr:hover td *:not(.cents-badge){color:#1a1a18 !important;}
 
 /* Cents badge */
 .cents-badge{display:inline-block;padding:2px 8px;border-radius:2px;
-  font-family:'Raleway','Space Mono',monospace;font-size:9px;letter-spacing:0.06em;}
+  font-family:'Observer Text','Raleway','Space Mono',monospace;font-size:11px;letter-spacing:0.06em;font-style:italic;font-weight:normal;}
 
 /* Spelling */
-.spelling{font-family:'Raleway','Space Mono',monospace;font-size:11px;letter-spacing:0.06em;color:#111;}
-.adj{font-family:'Raleway','Space Mono',monospace;font-size:9px;opacity:0.6;}
+.spelling{font-family:'Observer Text','Raleway','Space Mono',monospace;font-size:13px;letter-spacing:0.06em;color:#111;font-style:italic;font-weight:normal;}
+.adj{font-family:'Observer Text','Raleway','Space Mono',monospace;font-size:11px;opacity:0.6;font-style:italic;font-weight:normal;}
 
 /* Quick reference grid */
 .quick-ref{background:#fff;border:2px solid #111;border-radius:8px;padding:18px 20px;margin-bottom:20px;}
@@ -101,7 +101,7 @@ tr:hover td *:not(.cents-badge){color:#1a1a18 !important;}
 .qr-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
 .qr-card{padding:12px 14px;border-radius:4px;}
 .qr-name{font-family:'Raleway','Space Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;font-weight:700;margin-bottom:4px;}
-.qr-desc{font-family:'Raleway','Space Mono',monospace;font-size:8px;letter-spacing:0.04em;line-height:1.5;}
+.qr-desc{font-family:'Observer Text','Raleway','Space Mono',monospace;font-size:10px;letter-spacing:0.04em;line-height:1.5;font-style:italic;font-weight:normal;}
 
 /* Audio feedback */
 tr.playing td{background:#acc6a1 !important;}
@@ -110,7 +110,7 @@ tr.playing td *:not(.cents-badge){color:#1a1a18 !important;}
   background:currentColor;margin-right:4px;opacity:0;transition:opacity 0.15s;vertical-align:middle;}
 tr.playing .play-dot{opacity:1;}
 tr{cursor:pointer;}
-.middle-c-tag{font-family:'Raleway','Space Mono',monospace;font-size:9px;letter-spacing:0.08em;color:#2e8b57;margin-left:6px;}
+.middle-c-tag{font-family:'Observer Text','Raleway','Space Mono',monospace;font-size:11px;letter-spacing:0.08em;color:#2e8b57;margin-left:6px;font-style:italic;font-weight:normal;}
 
 /* Footer */
 .footer{text-align:center;margin-top:24px;padding-bottom:20px;}
@@ -516,7 +516,7 @@ function renderTable() {
           ${adjLabel(row.cents)}
         </span>
       </td>
-      <td style="color:${col.hex};font-variant-numeric:tabular-nums;font-family:'Raleway','Space Mono',monospace;font-size:9px">
+      <td style="color:${col.hex};font-family:'Observer Text','Raleway',monospace;font-style:italic;font-size:11px">
         ${row.cents === 0 ? '0&cent;' : (row.cents > 0 ? '+' : '') + row.cents + '&cent;'}
       </td>
       <td>
@@ -525,7 +525,7 @@ function renderTable() {
           <span style="color:${col.hex};font-size:9px;font-family:'Raleway','Space Mono',monospace;font-weight:700">${col.name}</span>
         </div>
       </td>
-      <td style="color:#111;font-size:9px;font-family:'Raleway','Space Mono',monospace">${harpInstruction(row)}</td>
+      <td style="color:#111;font-size:11px;font-family:'Observer Text','Raleway',monospace;font-style:italic">${harpInstruction(row)}</td>
     `
     tr.addEventListener('click', () => playRow(row, tr))
     tbody.appendChild(tr)
